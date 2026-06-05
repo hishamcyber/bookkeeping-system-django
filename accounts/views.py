@@ -5,6 +5,7 @@ from .forms import RegisterForm
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
+from django.contrib.auth.models import Group
 
 from records.models import Record
 from django.db.models import Sum
@@ -17,7 +18,11 @@ def register(request):
         form = RegisterForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            user = form.save()
+
+            users_group, created = Group.objects.get_or_create(name='Users')
+            user.groups.add(users_group)
+
             return redirect('login')
     else:
         form = RegisterForm()
