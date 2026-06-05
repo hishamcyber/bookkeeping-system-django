@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-a&l$kn9g6z3$s^yg3i0zwffaryl8g6lom-&jg700w&wv5!rxpm
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+# ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 # Application definition
 
@@ -37,11 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    #apps:
+    # apps:
     'accounts',
-    'categories',
     'records',
     'reports',
+    # create categories by default ( guys dont touch this one )
+    'categories.apps.CategoriesConfig',
 ]
 
 MIDDLEWARE = [
@@ -59,7 +60,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

@@ -1,0 +1,19 @@
+<h1>Dashboard</h1>
+
+<a href="{% url 'add_record' %}">Add Record</a>
+
+<p>Income: {{ income }}</p>
+<p>Expense: {{ expense }}</p>
+<p>Balance: {{ balance }}</p>
+
+<h3>Recent Records</h3>
+
+<ul>
+{% for r in records %}
+    <li>{{ r.transaction_type }} - {{ r.amount }}</li>
+{% empty %}
+    <li>No records yet</li>
+{% endfor %}
+</ul>
+
+<a href="{% url 'logout' %}">Logout</a>

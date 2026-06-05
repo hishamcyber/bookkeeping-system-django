@@ -1,0 +1,11 @@
+<h1>Records</h1>
+
+<a href="{% url 'add_record' %}">Add Record</a>
+
+<ul>
+{% for r in records %}
+    <li>
+        {{ r.transaction_type }} - {{ r.amount }} - {{ r.remarks }}
+    </li>
+{% endfor %}
+</ul>
