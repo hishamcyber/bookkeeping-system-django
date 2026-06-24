@@ -1,19 +1,381 @@
-<h1>Dashboard</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Bookkeeping System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, monospace;
+        }
 
-<a href="{% url 'add_record' %}">Add Record</a>
+        :root {
+            --neon-green: #00ff41;
+            --mid-green: #00aa2b;
+            --dark-green: #004d14;
+            --neon-red: #ff2b4f;
+            --dark-bg: #000000;
+            --card-bg: #070709;
+            --input-bg: #0f0f12;
+            --text-white: #e6ffe6;
+            --text-gray: #88bb99;
+        }
 
-<p>Income: {{ income }}</p>
-<p>Expense: {{ expense }}</p>
-<p>Balance: {{ balance }}</p>
+        body {
+            overflow-x: hidden;
+            min-height: 100vh;
+            background: var(--dark-bg);
+            padding: 0;
+            color: var(--text-white);
+        }
 
-<h3>Recent Records</h3>
+        /* 3D Canvas Background + Cyber Grid Overlay */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -3;
+        }
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image: linear-gradient(rgba(0, 255, 65, 0.07) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 65, 0.07) 1px, transparent 1px);
+            background-size: 45px 45px;
+            z-index: -2;
+            pointer-events: none;
+        }
 
-<ul>
-{% for r in records %}
-    <li>{{ r.transaction_type }} - {{ r.amount }}</li>
-{% empty %}
-    <li>No records yet</li>
-{% endfor %}
-</ul>
+        /* Animated Glow Sweep Keyframe */
+        @keyframes sweepGlow {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        @keyframes pulseGlow {
+            0%,100% { box-shadow: 0 0 15px var(--mid-green); }
+            50% { box-shadow: 0 0 30px var(--neon-green), 0 0 45px rgba(0,255,65,0.4); }
+        }
+        @keyframes floatUp {
+            0%,100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+        @keyframes textFlicker {
+            0%,92%,94%,96%,100% { text-shadow: 0 0 12px var(--neon-green); }
+            93%,95% { text-shadow: 0 0 4px var(--neon-green); }
+        }
 
-<a href="{% url 'logout' %}">Logout</a>
+        /* Navbar Header */
+        .main-nav {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(12px);
+            background: rgba(7,7,9,0.75);
+            border-bottom: 1px solid rgba(0,255,65,0.25);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .page-title {
+            font-size: 3rem;
+            color: var(--neon-green);
+            animation: textFlicker 4s infinite linear;
+            letter-spacing: 2px;
+        }
+        .nav-actions {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        /* Universal Cyber Button Style (Dynamic Hover Animation) */
+        .cyber-btn {
+            position: relative;
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, var(--mid-green), var(--neon-green));
+            color: #000;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.05rem;
+            border-radius: 10px;
+            border: none;
+            overflow: hidden;
+            transition: all 0.35s ease;
+            cursor: pointer;
+        }
+        .cyber-btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+            animation: sweepGlow 3.2s infinite linear;
+        }
+        .cyber-btn:hover {
+            transform: translateY(-4px) scale(1.03);
+            animation: pulseGlow 1.8s infinite ease-in-out;
+        }
+        .cyber-btn:active {
+            transform: translateY(1px) scale(0.98);
+        }
+        .logout-btn {
+            background: linear-gradient(135deg, #800019, var(--neon-red));
+        }
+        .logout-btn:hover {
+            box-shadow: 0 0 30px var(--neon-red);
+        }
+
+        /* Main Wrapper Container */
+        .dashboard-wrapper {
+            position: relative;
+            z-index: 1;
+            max-width: 1250px;
+            margin: 50px auto;
+            padding: 0 30px;
+        }
+
+        /* Stats Grid Layout */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 30px;
+            margin-bottom: 55px;
+        }
+        .stat-card {
+            position: relative;
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 40px 25px;
+            overflow: hidden;
+            border: 1px solid rgba(0,255,65,0.3);
+            transition: all 0.4s ease;
+            animation: floatUp 6s infinite ease-in-out;
+        }
+        .stat-card::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0,255,65,0.12), transparent);
+            animation: sweepGlow 4s infinite linear;
+            pointer-events: none;
+        }
+        .stat-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 0 40px rgba(0,255,65,0.35);
+        }
+        .stat-card h4 {
+            font-size: 1.3rem;
+            color: var(--text-gray);
+            margin-bottom: 16px;
+            letter-spacing: 1px;
+        }
+        .stat-value {
+            font-size: 2.6rem;
+            font-weight: bold;
+        }
+        .income-card .stat-value { color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
+        .expense-card .stat-value { color: var(--neon-red); text-shadow: 0 0 10px var(--neon-red); }
+        .balance-card .stat-value { color: #ffffff; text-shadow: 0 0 12px #fff; }
+
+        /* Recent Records Section Panel */
+        .records-panel {
+            background: var(--card-bg);
+            border: 1px solid rgba(0,255,65,0.3);
+            border-radius: 18px;
+            padding: 40px;
+            margin-bottom: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+        .records-panel::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0,255,65,0.08), transparent);
+            animation: sweepGlow 5s infinite linear;
+            pointer-events: none;
+        }
+        .records-panel h3 {
+            font-size: 2.2rem;
+            color: var(--neon-green);
+            margin-bottom: 30px;
+            animation: textFlicker 5s infinite linear;
+        }
+
+        /* Transaction List Styling */
+        .transaction-list {
+            list-style: none;
+        }
+        .transaction-item {
+            padding: 18px 22px;
+            margin: 14px 0;
+            background: var(--input-bg);
+            border-left: 5px solid transparent;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .transaction-item:hover {
+            transform: translateX(8px);
+            box-shadow: 0 0 20px rgba(0,255,65,0.22);
+        }
+        .income-row { border-left-color: var(--neon-green); }
+        .expense-row { border-left-color: var(--neon-red); }
+        .tag-income {
+            padding: 6px 14px;
+            background: rgba(0,255,65,0.18);
+            border: 1px solid var(--neon-green);
+            border-radius: 20px;
+            color: var(--neon-green);
+        }
+        .tag-expense {
+            padding: 6px 14px;
+            background: rgba(255,43,79,0.18);
+            border: 1px solid var(--neon-red);
+            border-radius: 20px;
+            color: var(--neon-red);
+        }
+
+        /* Floating Logout Bottom Right */
+        .float-logout {
+            position: fixed;
+            bottom: 35px;
+            right: 35px;
+            z-index: 9;
+        }
+    </style>
+</head>
+<body>
+    <!-- 3D Animated Particle Background -->
+    <canvas id="bg-canvas"></canvas>
+    <!-- Cyber Grid Overlay -->
+    <div class="grid-overlay"></div>
+
+    <!-- Top Navigation Bar -->
+    <nav class="main-nav">
+        <h1 class="page-title">DASHBOARD</h1>
+        <div class="nav-actions">
+            <a href="{% url 'add_record' %}" class="cyber-btn">+ Add New Record</a>
+        </div>
+    </nav>
+
+    <!-- Main Dashboard Content -->
+    <div class="dashboard-wrapper">
+        <!-- Income / Expense / Balance Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card income-card">
+                <h4>TOTAL INCOME</h4>
+                <div class="stat-value">{{ income }}</div>
+            </div>
+            <div class="stat-card expense-card">
+                <h4>TOTAL EXPENSE</h4>
+                <div class="stat-value">{{ expense }}</div>
+            </div>
+            <div class="stat-card balance-card">
+                <h4>CURRENT BALANCE</h4>
+                <div class="stat-value">{{ balance }}</div>
+            </div>
+        </div>
+
+        <!-- Recent Transactions Section -->
+        <div class="records-panel">
+            <h3>Recent Transaction Records</h3>
+            <ul class="transaction-list">
+                {% for r in records %}
+                {% if r.transaction_type == 'Income' %}
+                    <li class="transaction-item income-row">
+                        <span>{{ r.transaction_type }}</span>
+                        <span class="tag-income">+ {{ r.amount }}</span>
+                    </li>
+                {% else %}
+                    <li class="transaction-item expense-row">
+                        <span>{{ r.transaction_type }}</span>
+                        <span class="tag-expense">- {{ r.amount }}</span>
+                    </li>
+                {% endif %}
+                {% empty %}
+                    <li class="transaction-item">No transaction records created yet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Floating Logout Button -->
+    <div class="float-logout">
+        <a href="{% url 'logout' %}" class="cyber-btn logout-btn">Logout Account</a>
+    </div>
+
+    <!-- Three.js Advanced 3D Layered Particle Background -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <script>
+        const canvas = document.getElementById('bg-canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+
+        // Double particle layers for depth effect
+        // Layer 1: Large slow particles
+        const geo1 = new THREE.BufferGeometry();
+        const count1 = 600;
+        const pos1 = new Float32Array(count1 * 3);
+        for(let i = 0; i < count1 *3; i++) pos1[i] = (Math.random()-0.5)*22;
+        geo1.setAttribute('position', new THREE.BufferAttribute(pos1,3));
+        const mat1 = new THREE.PointsMaterial({ color:0x00ff41, size:0.12, transparent:true, opacity:0.6 });
+        const mesh1 = new THREE.Points(geo1, mat1);
+        scene.add(mesh1);
+
+        // Layer 2: Small fast distant particles
+        const geo2 = new THREE.BufferGeometry();
+        const count2 = 1400;
+        const pos2 = new Float32Array(count2 *3);
+        for(let i = 0; i < count2 *3; i++) pos2[i] = (Math.random()-0.5)*30;
+        geo2.setAttribute('position', new THREE.BufferAttribute(pos2,3));
+        const mat2 = new THREE.PointsMaterial({ color:0x88ffaa, size:0.04, transparent:true, opacity:0.4 });
+        const mesh2 = new THREE.Points(geo2, mat2);
+        scene.add(mesh2);
+
+        camera.position.z = 6;
+
+        // Smooth animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            mesh1.rotation.x += 0.0006;
+            mesh1.rotation.y += 0.0009;
+            mesh2.rotation.x -= 0.0004;
+            mesh2.rotation.y -= 0.0007;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Responsive resize handler
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        })
+    </script>
+</body>
+</html>

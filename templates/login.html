@@ -1,13 +1,165 @@
-<h1>Login</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Bookkeeping System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
 
-<form method="post">
-    {% csrf_token %}
+        /* Fullscreen 3D Canvas Container */
+        body {
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
 
-    <input type="text" name="username" placeholder="Username">
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
 
-    <input type="password" name="password" placeholder="Password">
+        /* Login Card (neon green panel style) */
+        .login-card {
+            position: relative;
+            z-index: 2;
+            background: #0a0a0a;
+            border: 2px solid #00ff41;
+            border-radius: 16px;
+            padding: 40px 30px;
+            box-shadow: 0 0 25px #00ff41, inset 0 0 12px rgba(0,255,65,0.15);
+            width: 380px;
+            text-align: center;
+        }
 
-    <button type="submit">
-        Login
-    </button>
-</form>
+        h1 {
+            color: #00ff41;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px #00ff41;
+        }
+
+        /* Input styling */
+        input {
+            width: 100%;
+            padding: 14px 18px;
+            margin: 12px 0;
+            background: #111;
+            border: 1px solid #00cc33;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #00ff41;
+            box-shadow: 0 0 12px #00ff41;
+        }
+
+        input::placeholder {
+            color: #00aa2b;
+        }
+
+        /* Button with hover color shift animation */
+        button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 15px;
+            background: #00aa2b;
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.35s ease;
+            box-shadow: 0 0 10px #00aa2b;
+        }
+
+        button:hover {
+            background: #00ff41;
+            box-shadow: 0 0 22px #00ff41;
+            transform: translateY(-3px);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+    </style>
+</head>
+<body>
+    <!-- 3D Canvas Background -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Login Form -->
+    <div class="login-card">
+        <h1>Login</h1>
+        <form method="post">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Username">
+            <input type="password" name="password" placeholder="Password">
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <!-- Three.js for 3D Canvas Background -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <script>
+        // Initialize 3D Scene
+        const canvas = document.getElementById('bg-canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+
+        // Neon green rotating 3D grid/particles
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particleCount = 800;
+        const posArray = new Float32Array(particleCount * 3);
+        for(let i = 0; i < particleCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 15;
+        }
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const particleMaterial = new THREE.PointsMaterial({
+            color: 0x00ff41,
+            size: 0.08,
+            transparent: true,
+            opacity: 0.75
+        });
+        const particlesMesh = new THREE.Points(particlesGeometry, particleMaterial);
+        scene.add(particlesMesh);
+        camera.position.z = 5;
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            particlesMesh.rotation.x += 0.0008;
+            particlesMesh.rotation.y += 0.0012;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Responsive resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        })
+    </script>
+</body>
+</html>
