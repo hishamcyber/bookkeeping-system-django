@@ -219,15 +219,18 @@
         <!-- Page Header -->
         <div class="page-header">
             <h1>All Transaction Records</h1>
-            <a href="{% url 'add_record' %}" class="cyber-btn">+ Add New Record</a>
+            <div style="display: flex; gap: 15px;">
+                <a href="{% url 'dashboard' %}" class="cyber-btn" style="background: linear-gradient(135deg, #004d14, #00aa2b);">← Dashboard</a>
+                <a href="{% url 'add_record' %}" class="cyber-btn">+ Add New Record</a>
+            </div>
         </div>
 
         <!-- Main Records Card Panel -->
         <div class="records-card">
             <ul class="transaction-list">
                 {% for r in records %}
-                <li class="transaction-item {% if r.transaction_type == 'Income' %}income-row{% else %}expense-row{% endif %}">
-                    <span class="trans-type {% if r.transaction_type == 'Income' %}trans-income{% else %}trans-expense{% endif %}">
+                <li class="transaction-item {% if r.transaction_type == 'income' %}income-row{% else %}expense-row{% endif %}">
+    <span class="trans-type {% if r.transaction_type == 'income' %}trans-income{% else %}trans-expense{% endif %}">
                         {{ r.transaction_type }}
                     </span>
                     <span class="trans-amount">{{ r.amount }}</span>

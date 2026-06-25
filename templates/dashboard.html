@@ -276,6 +276,7 @@
     <nav class="main-nav">
         <h1 class="page-title">DASHBOARD</h1>
         <div class="nav-actions">
+            <a href="{% url 'add_category' %}" class="cyber-btn">+ Add Category</a>
             <a href="{% url 'add_record' %}" class="cyber-btn">+ Add New Record</a>
         </div>
     </nav>
@@ -298,9 +299,40 @@
             </div>
         </div>
 
+
+        <!-- Categories Quick Access Card -->
+        <div class="records-panel" style="margin-bottom: 30px;">
+            <h3>Categories</h3>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;">
+                {% for cat in recent_categories %}
+                <div class="transaction-item" style="
+                    flex: 1;
+                    min-width: 120px;
+                    justify-content: center;
+                    border-left-color: var(--neon-green);
+                    text-align: center;
+                    font-weight: 600;
+                    color: var(--neon-green);
+                ">
+                    {{ cat.name }}
+                </div>
+                {% empty %}
+                <div class="transaction-item">No categories yet.</div>
+                {% endfor %}
+            </div>
+            <a href="{% url 'category_list' %}" class="cyber-btn" style="font-size: 0.95rem; padding: 12px 24px;">
+                Manage All Categories →
+            </a>
+        </div>
+
         <!-- Recent Transactions Section -->
         <div class="records-panel">
-            <h3>Recent Transaction Records</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h3 style="margin-bottom: 0;">Recent Transaction Records</h3>
+                <a href="{% url 'records' %}" class="cyber-btn" style="font-size: 0.95rem; padding: 12px 24px;">
+                    View All Records →
+                </a>
+            </div>
             <ul class="transaction-list">
                 {% for r in records %}
                 {% if r.transaction_type == 'Income' %}

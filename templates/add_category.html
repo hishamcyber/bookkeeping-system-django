@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Category</title>
+</head>
+<body>
+    <h1>Add New Category</h1>
+    <a href="{% url 'category_list' %}">← Back to Categories</a>
+
+    <hr>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <label>Category Type:</label><br>
+        <select name="category_type" id="category_type" onchange="toggleMainCategory()">
+            <option value="main">Main Category</option>
+            <option value="sub">Sub Category</option>
+        </select>
+
+        <br><br>
+
+        <div id="main_category_field" style="display:none;">
+            <label>Select Main Category:</label><br>
+            <select name="main_category">
+                {% for main in main_categories %}
+                    <option value="{{ main.id }}">{{ main.name }}</option>
+                {% empty %}
+                    <option disabled>No main categories yet — create one first</option>
+                {% endfor %}
+            </select>
+            <br><br>
+        </div>
+
+        <label>Category Name:</label><br>
+        <input type="text" name="name" required>
+
+        <br><br>
+
+        <button type="submit">Add Category</button>
+    </form>
+
+    <script>
+        function toggleMainCategory() {
+            const type = document.getElementById('category_type').value;
+            const field = document.getElementById('main_category_field');
+            field.style.display = type === 'sub' ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>

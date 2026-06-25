@@ -59,11 +59,16 @@ def dashboard(request):
 
     balance = income - expense
 
+    # Get recently used categories from records
+    from categories.models import MainCategory
+    recent_categories = MainCategory.objects.filter(user=request.user).order_by('-created_at')[:4]
+
     return render(request, 'dashboard.html', {
         'income': income,
         'expense': expense,
         'balance': balance,
-        'records': records[:5]
+        'records': records[:5],
+        'recent_categories': recent_categories,
     })
 
 
