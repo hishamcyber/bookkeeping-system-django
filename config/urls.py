@@ -16,6 +16,8 @@ urlpatterns = [
     path('', include('accounts.urls')),
     path('records/', include('records.urls')),
     path('categories/', include('categories.urls')),
+    path('reports/', include('reports.urls')),
+    path('categories/', include('categories.urls')),
 ]
 
 handler404 = custom_404
