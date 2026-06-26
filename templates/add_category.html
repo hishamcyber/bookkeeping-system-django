@@ -211,7 +211,7 @@
     <div class="grid-overlay"></div>
 
     <nav class="main-nav">
-        <h1 class="page-title">ADD NEW RECORD</h1>
+        <h1 class="page-title">ADD CATEGORY</h1>
         <div class="nav-actions">
             <a href="{% url 'dashboard' %}" class="cyber-btn">← Back</a>
         </div>
@@ -221,34 +221,32 @@
         <div class="records-panel">
             <form method="post">
                 {% csrf_token %}
+
                 <div class="form-group">
-                    <label>Main Category</label>
+                    <label>Category Type</label>
+                    <select name="category_type" id="category_type" onchange="toggleMainCategory()">
+                        <option value="main">Main Category</option>
+                        <option value="sub">Sub Category</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="main_category_field" style="display:none;">
+                    <label>Select Main Category</label>
                     <select name="main_category">
-                        <option value="">--Select Main Category--</option>
+                        {% for main in main_categories %}
+                            <option value="{{ main.id }}">{{ main.name }}</option>
+                        {% empty %}
+                            <option disabled>No main categories yet — create one first</option>
+                        {% endfor %}
                     </select>
                 </div>
+
                 <div class="form-group">
-                    <label>Sub Category (optional)</label>
-                    <select name="sub_category">
-                        <option value="">--Select Main Category First--</option>
-                    </select>
+                    <label>Category Name</label>
+                    <input type="text" name="name" required placeholder="Enter category name">
                 </div>
-                <div class="form-group">
-                    <label>Transaction Type</label>
-                    <select name="transaction_type">
-                        <option>Income</option>
-                        <option>Expense</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Amount</label>
-                    <input type="number" name="amount" required>
-                </div>
-                <div class="form-group">
-                    <label>Remarks (optional)</label>
-                    <textarea rows="3" name="remarks"></textarea>
-                </div>
-                <button class="cyber-btn">Save Record</button>
+
+                <button class="cyber-btn" type="submit">Add Category</button>
             </form>
         </div>
     </div>
@@ -259,6 +257,14 @@
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     <script>
+
+function toggleMainCategory() {
+        const type = document.getElementById('category_type').value;
+        const field = document.getElementById('main_category_field');
+        field.style.display = type === 'sub' ? 'block' : 'none';
+    }
+
+
         const canvas = document.getElementById('bg-canvas');
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);

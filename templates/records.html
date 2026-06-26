@@ -211,12 +211,12 @@
 <body>
     <canvas id="bg-canvas"></canvas>
 
-<<<<<<< HEAD
+
     <nav class="main-nav">
         <h1 class="page-title">ALL TRANSACTION RECORDS</h1>
         <div class="nav-actions">
             <a href="{% url 'add_record' %}" class="cyber-btn">+ Add New Record</a>
-=======
+
     <div class="records-wrapper">
         <!-- Page Header -->
         <div class="page-header">
@@ -225,7 +225,7 @@
                 <a href="{% url 'dashboard' %}" class="cyber-btn" style="background: linear-gradient(135deg, #004d14, #00aa2b);">← Dashboard</a>
                 <a href="{% url 'add_record' %}" class="cyber-btn">+ Add New Record</a>
             </div>
->>>>>>> origin/main
+
         </div>
     </nav>
 
@@ -234,7 +234,7 @@
             <h3>Recent Transaction Records</h3>
             <ul class="transaction-list">
                 {% for r in records %}
-<<<<<<< HEAD
+
                 {% if r.transaction_type == 'Income' %}
                     <li class="transaction-item income-row">
                         <span>{{ r.transaction_type }}</span>
@@ -246,7 +246,7 @@
                         <span class="tag-expense">- {{ r.amount }}</span>
                     </li>
                 {% endif %}
-=======
+
                 <li class="transaction-item {% if r.transaction_type == 'income' %}income-row{% else %}expense-row{% endif %}">
     <span class="trans-type {% if r.transaction_type == 'income' %}trans-income{% else %}trans-expense{% endif %}">
                         {{ r.transaction_type }}
@@ -254,7 +254,7 @@
                     <span class="trans-amount">{{ r.amount }}</span>
                     <span class="trans-remarks">Remarks: {{ r.remarks }}</span>
                 </li>
->>>>>>> origin/main
+
                 {% empty %}
                     <li class="transaction-item empty-record">No transaction records created yet.</li>
                 {% endfor %}
