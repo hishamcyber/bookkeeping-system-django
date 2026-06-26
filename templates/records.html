@@ -49,7 +49,6 @@
             100% { background-position: 200% 0; }
         }
         @keyframes pulseGlow {
-            /* REDUCED GLOW TO STOP OVERFLOW */
             0%,100% { box-shadow: 0 0 8px rgba(0,164,230,0.2); }
             50% { box-shadow: 0 0 16px var(--primary-blue); }
         }
@@ -58,7 +57,6 @@
             50% { transform: translateY(-6px) rotate3d(0.2,0.15,0,1deg); }
         }
         @keyframes textGlow {
-            /* ONLY DOWNWARD GLOW, NO HORIZONTAL BLOOM */
             0%,100% { text-shadow: 0 10px 18px rgba(0,164,230,0.4); }
             50% { text-shadow: 0 12px 22px rgba(0,164,230,0.55); }
         }
@@ -74,7 +72,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            overflow: visible;
         }
         .page-title {
             font-size: 3rem;
@@ -89,11 +86,11 @@
             align-items: center;
         }
 
+        /* Shared style for BOTH buttons */
         .cyber-btn {
             position: relative;
             display: inline-block;
             padding: 15px 30px;
-            background: linear-gradient(135deg, var(--primary-blue), var(--primary-purple));
             color: #fff;
             text-decoration: none;
             font-weight: 700;
@@ -105,6 +102,11 @@
             cursor: pointer;
             transform-style: preserve-3d;
         }
+        /* Both buttons use identical blue-purple gradient */
+        .btn-primary, .btn-green {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-purple));
+        }
+        /* Shimmer sweep light (works on both buttons) */
         .cyber-btn::before {
             content: "";
             position: absolute;
@@ -115,6 +117,7 @@
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
             animation: sweepGlow 3.2s infinite linear;
         }
+        /* Hover 3D lift for EVERY button */
         .cyber-btn:hover {
             transform: translateY(-4px) scale(1.03) translate3d(0,0,12px);
             animation: pulseGlow 1.8s infinite ease-in-out;
@@ -140,7 +143,6 @@
             padding: 40px;
             position: relative;
             overflow: hidden;
-            /* CAPPED SHADOW TO PREVENT OUTSIDE BLOOM */
             box-shadow: 0 10px 30px rgba(0,164,230,0.15);
             animation: floatUp 6s infinite ease-in-out;
             transform-style: preserve-3d;
@@ -180,23 +182,15 @@
         }
         .transaction-item:hover {
             transform: translateX(8px);
-            /* Restricted row glow, no overflow */
             box-shadow: 0 0 12px rgba(0,164,230,0.18);
         }
         .income-row { border-left-color: var(--primary-blue); }
         .expense-row { border-left-color: var(--accent-red); }
-        .tag-income {
-            padding: 6px 14px;
-            background: rgba(0,164,230,0.18);
-            border: 1px solid var(--primary-blue);
-            border-radius: 20px;
+
+        .amount-income{
             color: var(--primary-blue);
         }
-        .tag-expense {
-            padding: 6px 14px;
-            background: rgba(201, 68, 255,0.18);
-            border: 1px solid var(--accent-red);
-            border-radius: 20px;
+        .amount-expense{
             color: var(--accent-red);
         }
 
@@ -211,21 +205,11 @@
 <body>
     <canvas id="bg-canvas"></canvas>
 
-
     <nav class="main-nav">
         <h1 class="page-title">ALL TRANSACTION RECORDS</h1>
         <div class="nav-actions">
-            <a href="{% url 'add_record' %}" class="cyber-btn">+ Add New Record</a>
-
-    <div class="records-wrapper">
-        <!-- Page Header -->
-        <div class="page-header">
-            <h1>All Transaction Records</h1>
-            <div style="display: flex; gap: 15px;">
-                <a href="{% url 'dashboard' %}" class="cyber-btn" style="background: linear-gradient(135deg, #004d14, #00aa2b);">← Dashboard</a>
-                <a href="{% url 'add_record' %}" class="cyber-btn">+ Add New Record</a>
-            </div>
-
+            <a href="{% url 'dashboard' %}" class="cyber-btn btn-green">← Dashboard</a>
+            <a href="{% url 'add_record' %}" class="cyber-btn btn-primary">+ Add New Record</a>
         </div>
     </nav>
 
@@ -234,27 +218,13 @@
             <h3>Recent Transaction Records</h3>
             <ul class="transaction-list">
                 {% for r in records %}
-
-                {% if r.transaction_type == 'Income' %}
-                    <li class="transaction-item income-row">
-                        <span>{{ r.transaction_type }}</span>
-                        <span class="tag-income">+ {{ r.amount }}</span>
-                    </li>
-                {% else %}
-                    <li class="transaction-item expense-row">
-                        <span>{{ r.transaction_type }}</span>
-                        <span class="tag-expense">- {{ r.amount }}</span>
-                    </li>
-                {% endif %}
-
                 <li class="transaction-item {% if r.transaction_type == 'income' %}income-row{% else %}expense-row{% endif %}">
-    <span class="trans-type {% if r.transaction_type == 'income' %}trans-income{% else %}trans-expense{% endif %}">
-                        {{ r.transaction_type }}
+                    <span>{{ r.transaction_type }}</span>
+                    <span class="{% if r.transaction_type == 'income' %}amount-income{% else %}amount-expense{% endif %}">
+                        {% if r.transaction_type == 'income' %}+{% else %}-{% endif %} {{ r.amount }}
                     </span>
-                    <span class="trans-amount">{{ r.amount }}</span>
-                    <span class="trans-remarks">Remarks: {{ r.remarks }}</span>
+                    <span>Remarks: {{ r.remarks }}</span>
                 </li>
-
                 {% empty %}
                     <li class="transaction-item empty-record">No transaction records created yet.</li>
                 {% endfor %}
