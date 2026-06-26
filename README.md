@@ -84,7 +84,7 @@ password: bookadmin
 username: bookuser
 password: adminadmin123
 ```
-
+   
 ---
 
 # 🧱 Database Design
@@ -99,7 +99,7 @@ password: adminadmin123
 
 * id
 * name
-* user (ForeignKey)
+* user (ForeignKey → User)
 * created_at
 
 ---
@@ -108,8 +108,8 @@ password: adminadmin123
 
 * id
 * name
-* main_category (ForeignKey)
-* user (ForeignKey)
+* main_category (ForeignKey → MainCategory)
+* user (ForeignKey → User)
 * created_at
 
 ---
@@ -117,28 +117,30 @@ password: adminadmin123
 ## Record
 
 * id
-* user (ForeignKey)
+* user (ForeignKey → User)
+* main_category (ForeignKey → MainCategory)
+* subcategory (ForeignKey → SubCategory, optional)
 * transaction_type (income / expense)
 * amount
-* subcategory (ForeignKey)
-* remarks
+* remarks (optional)
 * created_at
 
 ---
 
 # 🧭 System Flow
 
-1. User registers and logs in
-2. User is redirected to dashboard
-3. User creates categories (main & sub)
-4. User adds income/expense records
-5. Data is stored in database
-6. Dashboard calculates:
-
-   * Total income
-   * Total expense
-   * Balance
-7. User can filter records by type or category
+1. User registers → default categories are auto-created for their account
+2. User logs in and is redirected to dashboard
+3. Dashboard shows total income, total expense, and current balance
+4. User can add custom Main and Sub categories
+5. User can delete any category they created
+6. User adds income/expense records by selecting:
+   - Main Category (dropdown)
+   - Sub Category (optional, auto-updates based on main category via AJAX)
+   - Transaction type (income/expense)
+   - Amount
+   - Remarks (optional)
+7. Records are saved and reflected in dashboard stats
 
 ---
 
@@ -147,49 +149,56 @@ password: adminadmin123
 ```
 User
  ├── Authentication (Login/Register)
- │
- ├── Dashboard
- │     ├── Income / Expense summary
- │     ├── Recent records
- │
- ├── Categories
- │     ├── MainCategory
- │     └── SubCategory
- │
- └── Records
-       ├── Income / Expense entries
-       └── linked to SubCategory
-```
+│     └── Default categories auto-created on register
+│
+├── Dashboard
+│     ├── Total Income / Expense / Balance cards
+│     ├── Recent categories quick access
+│     ├── Recent records (last 5)
+│     └── Navigation to Records and Categories
+│
+├── Categories
+│     ├── MainCategory (add / delete)
+│     └── SubCategory (add / delete, linked to MainCategory)
+│
+└── Records
+├── Income / Expense entries
+├── Linked to MainCategory and SubCategory
+└── AJAX subcategory filtering by selected main category
 
 ---
 
 # 🔐 Security Features
 
-* User authentication system
-* Login required for all main pages
-* Data isolation using `request.user`
-* Each user only sees their own financial records
+* User authentication required for all main pages (`@login_required`)
+* Data isolation using `request.user` on all queries
+* Each user only sees their own categories and records
+* Category deletion protected — users can only delete their own categories
 
 ---
 
 # 📊 Key Pages
 
-| Page           | Description         |
-| -------------- | ------------------- |
-| `/register/`   | User registration   |
-| `/login/`      | User login          |
-| `/logout/`     | Logout              |
-| `/dashboard/`  | Financial overview  |
-| `/records/`    | Manage transactions |
-| `/categories/` | Manage categories   |
+| Page                           | Description                        |
+| ------------------------------ | ---------------------------------- |
+| `/register/`                   | User registration                  |
+| `/login/`                      | User login                         |
+| `/logout/`                     | Logout                             |
+| `/dashboard/`                  | Financial overview                 |
+| `/records/`                    | View all transaction records       |
+| `/records/add/`                | Add new income/expense record      |
+| `/records/get-subcategories/`  | AJAX endpoint for subcategory data |
+| `/categories/`                 | View, add, and delete categories   |
+| `/categories/add/`             | Add new main or sub category       |
+| `/categories/delete/<type>/<id>/` | Delete a category               |
 
 ---
 
 # 👥 Team Roles
 
-* **Backend Developer**: Django setup, models, business logic
-* **Frontend Developer**: UI templates and design
-* **Feature Developer**: Enhancements and system improvements
+* **Backend Developer (Orgil)**: Category CRUD logic, record form logic, AJAX subcategory filtering, default category signal, data isolation
+* **Frontend Developer (Noura)**: UI templates, Three.js backgrounds, cyberpunk theme design
+* **Project Lead (Hisham)**: Django setup, models, authentication, dashboard, project architecture
 
 ---
 
@@ -198,24 +207,28 @@ User
 * Add charts & analytics graphs
 * Export reports (PDF/Excel)
 * Budget planning system
-* Better UI with Bootstrap or React
 * Email notifications
+* Record editing and deletion
+* Filter records by category or date range
 
 ---
 
 # 📌 Notes
 
-* Make sure virtual environment is activated before running project
+* Always activate virtual environment before running the project
 * Do not use system-wide Python
+* On Windows PowerShell, run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` if activation fails
 * All user data is private and isolated per account
+* Default categories are automatically created for every new user on registration
 
 ---
 
 # 🏁 Project Status
 
-✔ Authentication system completed
-✔ Category system implemented
-✔ Record tracking completed
-✔ Dashboard analytics working
-✔ Filtering system implemented
-
+✔ Authentication system completed  
+✔ Default category auto-creation on registration  
+✔ Category system implemented (add / delete main & sub)  
+✔ Record tracking completed (with main & sub category selection)  
+✔ AJAX subcategory filtering implemented  
+✔ Dashboard analytics working  
+✔ User data isolation implemented

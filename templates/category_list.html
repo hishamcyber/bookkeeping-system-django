@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Categories</title>
+</head>
+<body>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1>My Categories</h1>
+        <div>
+            <a href="{% url 'dashboard' %}">← Dashboard</a>
+            &nbsp;&nbsp;
+            <a href="{% url 'add_category' %}">+ Add New Category</a>
+        </div>
+    </div>
+
+    <hr>
+
+    {% for main in main_categories %}
+        <div>
+            <h3>{{ main.name }} (Main Category)</h3>
+            <form method="post" action="{% url 'delete_category' 'main' main.id %}">
+                {% csrf_token %}
+                <button type="submit" onclick="return confirm('Delete this main category and all its subcategories?')">Delete</button>
+            </form>
+
+            <ul>
+                {% for sub in main.subcategory_set.all %}
+                    <li>
+                        {{ sub.name }}
+                        <form method="post" action="{% url 'delete_category' 'sub' sub.id %}">
+                            {% csrf_token %}
+                            <button type="submit" onclick="return confirm('Delete this subcategory?')">Delete</button>
+                        </form>
+                    </li>
+                {% empty %}
+                    <li>No subcategories yet</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <hr>
+    {% empty %}
+        <p>No categories yet. Add one!</p>
+    {% endfor %}
+</body>
+</html>
