@@ -67,26 +67,6 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
----
-
-# 👤 Default Test Accounts
-
-### Admin
-
-```
-username: bookadmin
-password: bookadmin
-```
-
-### User
-
-```
-username: bookuser
-password: adminadmin123
-```
-   
----
-
 # 🧱 Database Design
 
 ## User
@@ -232,3 +212,13 @@ User
 ✔ AJAX subcategory filtering implemented  
 ✔ Dashboard analytics working  
 ✔ User data isolation implemented
+```
+
+# 📷 Preview
+
+## Dashboard
+
+![Dashboard](./Preview/Dashboard.png)
+
+
+
