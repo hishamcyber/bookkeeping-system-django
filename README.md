@@ -232,3 +232,13 @@ User
 ✔ AJAX subcategory filtering implemented  
 ✔ Dashboard analytics working  
 ✔ User data isolation implemented
+
+# 📷 Preview
+
+## Dashboard
+
+![Dashboard](./Preview/dashboard.png)
+
+## Demo
+
+![Bookkeeping System Demo](./Preview/bookkeeping-system-django.gif)
